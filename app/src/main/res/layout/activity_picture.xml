@@ -60,6 +60,18 @@
         />
 
     <Button
+        android:id="@+id/takePictureButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="reset"
+        app:layout_constraintTop_toBottomOf="@id/test_view"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.7"
+        />
+
+    <Button
         android:id="@+id/resetBtn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
