@@ -1,47 +1,39 @@
 package com.example.intentactivity;
-//package com.example.picture;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.FragmentActivity;
 
 import android.app.Activity;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.ParcelFileDescriptor;
 import android.provider.MediaStore;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.content.Intent;
-
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
+import android.widget.Button;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.FileDescriptor;
 import java.util.Calendar;
 
-import androidx.fragment.app.FragmentActivity;
-
-import android.os.ParcelFileDescriptor;
-import android.graphics.BitmapFactory;
-import android.widget.Button;
 
 public class Picture extends FragmentActivity implements OnClickListener {
-    private static final int RESULT_PICK_IMAGEFILE = 1000;
-    static final int REQUEST_CAPTURE_IMAGE = 100;
-    public static Bitmap bmp;
-    TestCanvasView mCanvasView;
+    private static final int REQUEST_PICK_IMAGEFILE = 1000;
+    private static final int REQUEST_CAPTURE_IMAGEFILE = 100;
+    public CanvasView mCanvasView;
     private Button mUndoBtn;
     private Button mRedoBtn;
     private Button mResetBtn;
-
-    Button takePictureButton;
-    File photoFile;
+    private File photoFile;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_picture);
-        mCanvasView = (TestCanvasView)findViewById(R.id.test_view);
+        mCanvasView = (CanvasView)findViewById(R.id.canvasView);
 
         mUndoBtn = (Button) findViewById(R.id.undoBtn);
         mUndoBtn.setOnClickListener(this);
@@ -52,46 +44,45 @@ public class Picture extends FragmentActivity implements OnClickListener {
         mResetBtn = (Button) findViewById(R.id.resetBtn);
         mResetBtn.setOnClickListener(this);
 
-        // getImageボタン
-        findViewById(R.id.button2).setOnClickListener(new View.OnClickListener() {
+        // 画像選択ボタン
+        findViewById(R.id.albumBtn).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
                 intent.addCategory(Intent.CATEGORY_OPENABLE);
                 intent.setType("image/*");
-                startActivityForResult(intent, RESULT_PICK_IMAGEFILE);
+                startActivityForResult(intent, REQUEST_PICK_IMAGEFILE);
             }
         });
 
-        findViewById(R.id.takePictureButton).setOnClickListener(new OnClickListener(){
+        // 撮影ボタン
+        findViewById(R.id.cameraBtn).setOnClickListener(new OnClickListener(){
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                photoFile = new File(getExternalFilesDir(Environment.DIRECTORY_PICTURES), getPicFileName());
+                photoFile = new File(getExternalFilesDir(Environment.DIRECTORY_PICTURES), getFileName());
                 intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(photoFile));
-                startActivityForResult(intent, REQUEST_CAPTURE_IMAGE);
+                startActivityForResult(intent, REQUEST_CAPTURE_IMAGEFILE);
             }
         });
-
-
 
     }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent resultData) {
         super.onActivityResult(requestCode, resultCode, resultData);
-        if (requestCode == RESULT_PICK_IMAGEFILE && resultCode == RESULT_OK) {
+        if (requestCode == REQUEST_PICK_IMAGEFILE && resultCode == RESULT_OK) {
             Uri uri = null;
             if (resultData != null) {
                 uri = resultData.getData();
                 try {
-                    bmp = getBitmapFromUri(uri);
-                    mCanvasView.setCanvas(bmp);
+                    Bitmap mBitmap = getBitmapFromUri(uri);
+                    mCanvasView.setCanvas(mBitmap);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
             }
-        } else if(requestCode == REQUEST_CAPTURE_IMAGE && resultCode == Activity.RESULT_OK ){
+        } else if(requestCode == REQUEST_CAPTURE_IMAGEFILE && resultCode == Activity.RESULT_OK ){
             Bitmap capturedImage = BitmapFactory.decodeFile(photoFile.getAbsolutePath());
             mCanvasView.setCanvas(capturedImage);
         }
@@ -109,7 +100,7 @@ public class Picture extends FragmentActivity implements OnClickListener {
         }
     }
 
-    protected String getPicFileName(){
+    protected String getFileName(){
         Calendar c = Calendar.getInstance();
         String s = c.get(Calendar.YEAR)
                 + "_" + (c.get(Calendar.MONTH)+1)

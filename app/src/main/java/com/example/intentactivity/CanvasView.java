@@ -1,4 +1,5 @@
 package com.example.intentactivity;
+
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -11,7 +12,6 @@ import android.graphics.PorterDuff;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
-import android.view.View;
 import android.view.SurfaceView;
 import android.view.SurfaceHolder.Callback;
 
@@ -19,49 +19,45 @@ import java.util.ArrayDeque;
 import java.util.Deque;
 
 
-public class TestCanvasView extends SurfaceView implements Callback {
+public class CanvasView extends SurfaceView implements Callback {
     private Bitmap originalBitmap; // 初期ビットマップ
-
     private SurfaceHolder mHolder;
     private Paint mPaint;
     private Path mPath;
 
-    //
-    private Bitmap mLastDrawBitmap;
-    private Canvas mLastDrawCanvas;
+    private Bitmap mDrawBitmap;
+    private Canvas mDrawCanvas;
 
     private Deque<Path> mUndoStack = new ArrayDeque<Path>();
     private Deque<Path> mRedoStack = new ArrayDeque<Path>();
 
 
-    public TestCanvasView(Context context) {
+    public CanvasView(Context context) {
         super(context);
         init();
     }
 
-    public TestCanvasView(Context context, AttributeSet attrs) {
+    public CanvasView(Context context, AttributeSet attrs) {
         super(context, attrs);
         init();
     }
 
-    private void clearLastDrawBitmap() {
-        // 描画状態を保持するBitmapを生成します。
-        // ほぼ初期値
-        if (mLastDrawBitmap == null) {
-            mLastDrawBitmap = Bitmap.createBitmap(getWidth(), getHeight(), Bitmap.Config.ARGB_8888);
+    private void clearDrawBitmap() {
+        if (mDrawBitmap == null) {
+            mDrawBitmap = Bitmap.createBitmap(getWidth(), getHeight(), Bitmap.Config.ARGB_8888);
         }
 
-        if (mLastDrawCanvas == null) {
-            mLastDrawCanvas = new Canvas(mLastDrawBitmap);
+        if (mDrawCanvas == null) {
+            mDrawCanvas = new Canvas(mDrawBitmap);
         }
-        mLastDrawCanvas.drawColor(0, PorterDuff.Mode.CLEAR);
 
+        mDrawCanvas.drawColor(0, PorterDuff.Mode.CLEAR);
 
     }
 
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
-        clearLastDrawBitmap();
+        clearDrawBitmap();
         // canvasを初期表示(画像のみ)
         Canvas canvas = mHolder.lockCanvas();
         canvas.drawBitmap(originalBitmap, 0, 0, null);
@@ -74,11 +70,9 @@ public class TestCanvasView extends SurfaceView implements Callback {
 
     @Override
     public void surfaceDestroyed(SurfaceHolder holder) {
-//        super.surfaceDestroyed(holder);
-//        if (mLastDrawBitmap != null) {
-//            mLastDrawBitmap.recycle();
-//        }
-        mLastDrawBitmap.recycle();
+        if (mDrawBitmap != null) {
+            mDrawBitmap.recycle();
+        }
     }
 
 
@@ -89,16 +83,11 @@ public class TestCanvasView extends SurfaceView implements Callback {
 
         // canvasの初期化処理
         mHolder = getHolder();
-//        mHolder.addCallback(this);
-
-        // 透過します。
         setZOrderOnTop(true);
         mHolder.setFormat(PixelFormat.TRANSPARENT);
-
-        // コールバックを設定します。
         mHolder.addCallback(this);
 
-        // ペイントを設定します。
+        // ペイントの初期化処理
         mPaint = new Paint();
         mPaint.setColor(Color.BLACK);
         mPaint.setStyle(Paint.Style.STROKE);
@@ -141,11 +130,11 @@ public class TestCanvasView extends SurfaceView implements Callback {
         drawLine(mPath);
     }
 
-    // 指離した時？
+    // 指離した時
     private void onTouchUp(float x, float y) {
         mPath.lineTo(x, y);
         drawLine(mPath);
-        mLastDrawCanvas.drawPath(mPath, mPaint);
+        mDrawCanvas.drawPath(mPath, mPaint);
         mUndoStack.addLast(mPath);
         mRedoStack.clear();
     }
@@ -163,7 +152,7 @@ public class TestCanvasView extends SurfaceView implements Callback {
         canvas.drawBitmap(originalBitmap, 0, 0, null);
 
         // 前回描画したビットマップをキャンバスに描画します。
-        canvas.drawBitmap(mLastDrawBitmap, 0, 0, null);
+        canvas.drawBitmap(mDrawBitmap, 0, 0, null);
 
         // パスを描画します。
         canvas.drawPath(path, mPaint);
@@ -173,9 +162,7 @@ public class TestCanvasView extends SurfaceView implements Callback {
     }
 
     public void undo() {
-        if (mUndoStack.isEmpty()) {
-            return;
-        }
+        if (mUndoStack.isEmpty()) return;
 
         // undoスタックからパスを取り出し、redoスタックに格納します。
         Path lastUndoPath = mUndoStack.removeLast();
@@ -189,12 +176,12 @@ public class TestCanvasView extends SurfaceView implements Callback {
         canvas.drawBitmap(originalBitmap, 0, 0, null);
 
         // 描画状態を保持するBitmapをクリアします。
-        clearLastDrawBitmap();
+        clearDrawBitmap();
 
         // パスを描画します。
         for (Path path : mUndoStack) {
             canvas.drawPath(path, mPaint);
-            mLastDrawCanvas.drawPath(path, mPaint);
+            mDrawCanvas.drawPath(path, mPaint);
         }
 
         // ロックを外します。
@@ -202,9 +189,7 @@ public class TestCanvasView extends SurfaceView implements Callback {
     }
 
     public void redo() {
-        if (mRedoStack.isEmpty()) {
-            return;
-        }
+        if (mRedoStack.isEmpty()) return;
 
         // redoスタックからパスを取り出し、undoスタックに格納します。
         Path lastRedoPath = mRedoStack.removeLast();
@@ -213,22 +198,19 @@ public class TestCanvasView extends SurfaceView implements Callback {
         // パスを描画します。
         drawLine(lastRedoPath);
 
-        mLastDrawCanvas.drawPath(lastRedoPath, mPaint);
+        mDrawCanvas.drawPath(lastRedoPath, mPaint);
     }
 
     public void reset() {
         mUndoStack.clear();
         mRedoStack.clear();
 
-        clearLastDrawBitmap();
-        // canvasを初期表示(画像のみ)
-//        Canvas canvas = mHolder.lockCanvas();
-//        canvas.drawColor(0, PorterDuff.Mode.CLEAR);
-//        canvas.drawBitmap(originalBitmap, 0, 0, null);
-//        mHolder.unlockCanvasAndPost(canvas);
+        clearDrawBitmap();
+
         if (mHolder != null && mHolder.getSurface().isValid()) {
             Canvas canvas = mHolder.lockCanvas();
             if (canvas != null) {
+                // canvasを初期表示(画像のみ)
                 canvas.drawColor(0, PorterDuff.Mode.CLEAR);
                 canvas.drawBitmap(originalBitmap, 0, 0, null);
                 mHolder.unlockCanvasAndPost(canvas);
@@ -236,27 +218,16 @@ public class TestCanvasView extends SurfaceView implements Callback {
         }
     }
 
-    public void setCanvas(Bitmap _bmp){
-        // MainActivityからbmpを受け取る
-//        originalBitmap = _bmp.copy(Bitmap.Config.ARGB_8888, true);
-////        // canvasの初期化処理
-////        mHolder = getHolder();
-////
-////        // 透過します。
-////        setZOrderOnTop(true);
-////        mHolder.setFormat(PixelFormat.TRANSPARENT);
-//
-////        // コールバックを設定します。
-////        mHolder.addCallback(this);
-//        reset();
-        if (mLastDrawBitmap != null) {
-            mLastDrawBitmap.recycle();
+    public void setCanvas(Bitmap mBitmap){
+        // PictureActivityからBitMapを受け取る
+        if (mDrawBitmap != null) {
+            mDrawBitmap.recycle();
         }
 
-        mLastDrawBitmap = Bitmap.createBitmap(getWidth(), getHeight(), Bitmap.Config.ARGB_8888);
-        mLastDrawCanvas = new Canvas(mLastDrawBitmap);
+        mDrawBitmap = Bitmap.createBitmap(getWidth(), getHeight(), Bitmap.Config.ARGB_8888);
+        mDrawCanvas = new Canvas(mDrawBitmap);
 
-        originalBitmap = _bmp.copy(Bitmap.Config.ARGB_8888, true);
+        originalBitmap = mBitmap.copy(Bitmap.Config.ARGB_8888, true);
         reset();
     }
 
