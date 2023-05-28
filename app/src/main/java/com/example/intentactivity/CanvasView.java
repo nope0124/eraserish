@@ -341,4 +341,8 @@ public class CanvasView extends SurfaceView implements Callback {
         mosaicFlag = flag;
     }
 
+    public Bitmap getBitmap() {
+        return originalBitmap;
+    }
+
 }

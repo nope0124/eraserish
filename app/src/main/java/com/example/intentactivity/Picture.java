@@ -13,11 +13,19 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.widget.Button;
+import android.content.Context;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+
+
 
 import java.io.File;
 import java.io.IOException;
 import java.io.FileDescriptor;
+import java.io.FileOutputStream;
+
 import java.util.Calendar;
+
 
 
 public class Picture extends FragmentActivity implements OnClickListener {
@@ -76,6 +84,50 @@ public class Picture extends FragmentActivity implements OnClickListener {
             }
         });
 
+        findViewById(R.id.saveBtn).setOnClickListener(new OnClickListener(){
+            @Override
+            public void onClick(View v) {
+                // 保存するBitmapの作成
+                Bitmap bitmap = mCanvasView.getBitmap(); // 保存する画像のBitmap
+                // 保存先のファイルパス
+                String fileName = getFileName(); // 保存するファイル名
+                String directory = Environment.DIRECTORY_PICTURES; // 保存先のディレクトリ（ギャラリー）
+                File file = new File(Environment.getExternalStoragePublicDirectory(directory), fileName);
+                // Bitmapをファイルに保存
+                try {
+                    FileOutputStream outputStream = new FileOutputStream(file);
+                    bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream);
+                    outputStream.close();
+                    showSuccessPopup();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+                // ギャラリーに画像を追加するためのBroadcastを送信
+                Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
+                Uri contentUri = Uri.fromFile(file);
+                mediaScanIntent.setData(contentUri);
+                Context context = Picture.this;
+                context.sendBroadcast(mediaScanIntent);
+            }
+        });
+
+    }
+
+    // ポップアップウィンドウを表示するためのメソッド
+    private void showSuccessPopup() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Success");
+        builder.setMessage("保存が完了しました！");
+        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                // OKボタンがクリックされたときの処理
+                dialog.dismiss(); // ダイアログを閉じる
+            }
+        });
+        AlertDialog dialog = builder.create();
+        dialog.show();
     }
 
     @Override
