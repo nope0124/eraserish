@@ -30,6 +30,8 @@ public class CanvasView extends SurfaceView implements Callback {
     private Bitmap mDrawBitmap;
     private Canvas mDrawCanvas;
 
+    boolean mosaicFlag = true;
+
     private Deque<Path> mUndoStack = new ArrayDeque<Path>();
     private Deque<Path> mRedoStack = new ArrayDeque<Path>();
 
@@ -48,6 +50,10 @@ public class CanvasView extends SurfaceView implements Callback {
         if (mDrawBitmap == null) {
             mDrawBitmap = Bitmap.createBitmap(getWidth(), getHeight(), Bitmap.Config.ARGB_8888);
         }
+
+//        if (mMosaicBitmap == null) {
+            mMosaicBitmap = Bitmap.createBitmap(originalBitmap.getWidth(), originalBitmap.getHeight(), Bitmap.Config.ARGB_8888);
+//        }
 
         if (mDrawCanvas == null) {
             mDrawCanvas = new Canvas(mDrawBitmap);
@@ -82,8 +88,8 @@ public class CanvasView extends SurfaceView implements Callback {
     private void init() {
         // bitmapの初期化処理
         originalBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.sample).copy(Bitmap.Config.ARGB_8888, true);
-
         mMosaicBitmap = Bitmap.createBitmap(originalBitmap.getWidth(), originalBitmap.getHeight(), Bitmap.Config.ARGB_8888);
+
         // canvasの初期化処理
         mHolder = getHolder();
         setZOrderOnTop(true);
@@ -123,105 +129,116 @@ public class CanvasView extends SurfaceView implements Callback {
 
     // 指で触った時
     private void onTouchDown(float x, float y) {
-        mPath = new Path();
-        mPath.moveTo(x, y);
+        if(mosaicFlag == false) {
+            mPath = new Path();
+            mPath.moveTo(x, y);
+        }
     }
 
 
     // 指動かした時
     private void onTouchMove(float x, float y) {
-        mPath.lineTo(x, y);
-        int radius = 30;
-        int border = 30;
-        int[][] R = new int[radius*2+2][radius*2+2];
-        int[][] G = new int[radius*2+2][radius*2+2];
-        int[][] B = new int[radius*2+2][radius*2+2];
-        int[][] count = new int[radius*2+2][radius*2+2];
-        for(int i = 0; i < radius*2+2; i++) {
-            for(int j = 0; j < radius*2+2; j++) {
-                count[i][j] = 0;
+
+        if(mosaicFlag == true) {
+
+            int radius = 20;
+            int border = 20;
+            int[][] R = new int[radius * 2 + 2][radius * 2 + 2];
+            int[][] G = new int[radius * 2 + 2][radius * 2 + 2];
+            int[][] B = new int[radius * 2 + 2][radius * 2 + 2];
+            int[][] count = new int[radius * 2 + 2][radius * 2 + 2];
+            for (int i = 0; i < radius * 2 + 2; i++) {
+                for (int j = 0; j < radius * 2 + 2; j++) {
+                    count[i][j] = 0;
+                }
             }
-        }
-        for(int i = 0; i < radius*2+2; i++) {
-            for(int j = 0; j < radius*2+2; j++) {
-                int nx = (int)(x + j - radius);
-                int ny = (int)(y + i - radius);
-                if(nx < 0 || nx >= originalBitmap.getWidth() || ny < 0 || ny >= originalBitmap.getHeight()) continue;
+            for (int i = 0; i < radius * 2 + 2; i++) {
+                for (int j = 0; j < radius * 2 + 2; j++) {
+                    int nx = (int) (x + j - radius);
+                    int ny = (int) (y + i - radius);
+                    if (nx < 0 || nx >= originalBitmap.getWidth() || ny < 0 || ny >= originalBitmap.getHeight())
+                        continue;
 
-                int pixel = originalBitmap.getPixel(nx, ny);
+                    int pixel = originalBitmap.getPixel(nx, ny);
 
-                int up = Math.max(i-border, 0);
-                int down = Math.min(i+border+1, radius*2+1);
-                int left = Math.max(j-border, 0);
-                int right = Math.min(j+border+1, radius*2+1);
+                    int up = Math.max(i - border, 0);
+                    int down = Math.min(i + border + 1, radius * 2 + 1);
+                    int left = Math.max(j - border, 0);
+                    int right = Math.min(j + border + 1, radius * 2 + 1);
 
-                R[up][left] += Color.red(pixel);
-                R[down][right] += Color.red(pixel);
-                R[up][right] -= Color.red(pixel);
-                R[down][left] -= Color.red(pixel);
+                    R[up][left] += Color.red(pixel);
+                    R[down][right] += Color.red(pixel);
+                    R[up][right] -= Color.red(pixel);
+                    R[down][left] -= Color.red(pixel);
 
-                G[up][left] += Color.green(pixel);
-                G[down][right] += Color.green(pixel);
-                G[up][right] -= Color.green(pixel);
-                G[down][left] -= Color.green(pixel);
+                    G[up][left] += Color.green(pixel);
+                    G[down][right] += Color.green(pixel);
+                    G[up][right] -= Color.green(pixel);
+                    G[down][left] -= Color.green(pixel);
 
-                B[up][left] += Color.blue(pixel);
-                B[down][right] += Color.blue(pixel);
-                B[up][right] -= Color.blue(pixel);
-                B[down][left] -= Color.blue(pixel);
+                    B[up][left] += Color.blue(pixel);
+                    B[down][right] += Color.blue(pixel);
+                    B[up][right] -= Color.blue(pixel);
+                    B[down][left] -= Color.blue(pixel);
 
-                count[up][left] += 1;
-                count[down][right] += 1;
-                count[up][right] -= 1;
-                count[down][left] -= 1;
+                    count[up][left] += 1;
+                    count[down][right] += 1;
+                    count[up][right] -= 1;
+                    count[down][left] -= 1;
 
+                }
             }
-        }
 
-        for(int i = 0; i < radius*2+2; i++) {
-            for(int j = 0; j < radius*2+1; j++) {
-                R[i][j+1] += R[i][j];
-                G[i][j+1] += G[i][j];
-                B[i][j+1] += B[i][j];
-                count[i][j+1] += count[i][j];
+            for (int i = 0; i < radius * 2 + 2; i++) {
+                for (int j = 0; j < radius * 2 + 1; j++) {
+                    R[i][j + 1] += R[i][j];
+                    G[i][j + 1] += G[i][j];
+                    B[i][j + 1] += B[i][j];
+                    count[i][j + 1] += count[i][j];
+                }
             }
-        }
 
-        for(int j = 0; j < radius*2+2; j++) {
-            for(int i = 0; i < radius*2+1; i++) {
-                R[i+1][j] += R[i][j];
-                G[i+1][j] += G[i][j];
-                B[i+1][j] += B[i][j];
-                count[i+1][j] += count[i][j];
+            for (int j = 0; j < radius * 2 + 2; j++) {
+                for (int i = 0; i < radius * 2 + 1; i++) {
+                    R[i + 1][j] += R[i][j];
+                    G[i + 1][j] += G[i][j];
+                    B[i + 1][j] += B[i][j];
+                    count[i + 1][j] += count[i][j];
+                }
             }
-        }
 
-        for(int i = 0; i < radius*2+1; i++) {
-            for(int j = 0; j < radius*2+1; j++) {
-                int nx = (int)(x + j - radius);
-                int ny = (int)(y + i - radius);
-                if(nx < 0 || nx >= mMosaicBitmap.getWidth() || ny < 0 || ny >= mMosaicBitmap.getHeight()) continue;
-                if(count[i][j] == 0) continue;
+            for (int i = 0; i < radius * 2 + 1; i++) {
+                for (int j = 0; j < radius * 2 + 1; j++) {
+                    int nx = (int) (x + j - radius);
+                    int ny = (int) (y + i - radius);
+                    if (nx < 0 || nx >= mMosaicBitmap.getWidth() || ny < 0 || ny >= mMosaicBitmap.getHeight()) continue;
+                    if (count[i][j] == 0) continue;
 
-                R[i][j] /= count[i][j];
-                G[i][j] /= count[i][j];
-                B[i][j] /= count[i][j];
+                    R[i][j] /= count[i][j];
+                    G[i][j] /= count[i][j];
+                    B[i][j] /= count[i][j];
 
-                int invertedPixel = Color.argb(255, R[i][j], G[i][j], B[i][j]);
-                mMosaicBitmap.setPixel(nx, ny, invertedPixel);
+                    int changedPixel = Color.argb(255, R[i][j], G[i][j], B[i][j]);
+                    mMosaicBitmap.setPixel(nx, ny, changedPixel);
+                }
             }
+            drawLine(new Path());
+        }else {
+            mPath.lineTo(x, y);
+            drawLine(mPath);
         }
-
-
-        drawLine(mPath);
     }
 
     // 指離した時
     private void onTouchUp(float x, float y) {
-        mPath.lineTo(x, y);
-        drawLine(mPath);
-        mUndoStack.addLast(mPath);
-        mRedoStack.clear();
+
+        if(mosaicFlag == false) {
+            mPath.lineTo(x, y);
+            drawLine(mPath);
+            mDrawCanvas.drawPath(mPath, mPaint);
+            mUndoStack.addLast(mPath);
+            mRedoStack.clear();
+        }
     }
 
 
@@ -241,7 +258,7 @@ public class CanvasView extends SurfaceView implements Callback {
         canvas.drawBitmap(mDrawBitmap, 0, 0, null);
 
         // パスを描画します。
-//        canvas.drawPath(path, mPaint);
+        canvas.drawPath(path, mPaint);
 
         // ロックを外します。
         mHolder.unlockCanvasAndPost(canvas);
@@ -318,6 +335,10 @@ public class CanvasView extends SurfaceView implements Callback {
 
         mMosaicBitmap = Bitmap.createBitmap(originalBitmap.getWidth(), originalBitmap.getHeight(), Bitmap.Config.ARGB_8888);
         reset();
+    }
+
+    public void setMosaic(boolean flag) {
+        mosaicFlag = flag;
     }
 
 }

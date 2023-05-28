@@ -27,7 +27,11 @@ public class Picture extends FragmentActivity implements OnClickListener {
     private Button mUndoBtn;
     private Button mRedoBtn;
     private Button mResetBtn;
+    private Button mMosaicBtn;
+    private Button mDrawBtn;
     private File photoFile;
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,6 +47,12 @@ public class Picture extends FragmentActivity implements OnClickListener {
 
         mResetBtn = (Button) findViewById(R.id.resetBtn);
         mResetBtn.setOnClickListener(this);
+
+        mMosaicBtn = (Button) findViewById(R.id.mosaicBtn);
+        mMosaicBtn.setOnClickListener(this);
+
+        mDrawBtn = (Button) findViewById(R.id.drawBtn);
+        mDrawBtn.setOnClickListener(this);
 
         // 画像選択ボタン
         findViewById(R.id.albumBtn).setOnClickListener(new View.OnClickListener() {
@@ -94,9 +104,12 @@ public class Picture extends FragmentActivity implements OnClickListener {
             mCanvasView.undo();
         } else if (v == mRedoBtn) {
             mCanvasView.redo();
-
         } else if (v == mResetBtn) {
             mCanvasView.reset();
+        } else if (v == mMosaicBtn) {
+            mCanvasView.setMosaic(true);
+        } else if (v == mDrawBtn) {
+            mCanvasView.setMosaic(false);
         }
     }
 
