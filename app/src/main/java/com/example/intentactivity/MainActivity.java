@@ -15,7 +15,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        Button orientationActivitySwitchButton = (Button) findViewById(R.id.button_orientation);
+        Button orientationActivitySwitchButton = (Button) findViewById(R.id.button_picture);
         orientationActivitySwitchButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View arg0) {
                 Intent intent = new Intent(getApplicationContext(), Picture.class);

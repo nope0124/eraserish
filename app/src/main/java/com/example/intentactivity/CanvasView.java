@@ -51,9 +51,7 @@ public class CanvasView extends SurfaceView implements Callback {
             mDrawBitmap = Bitmap.createBitmap(originalBitmap.getWidth(), originalBitmap.getHeight(), Bitmap.Config.ARGB_8888);
         }
 
-//        if (mMosaicBitmap == null) {
-            mMosaicBitmap = Bitmap.createBitmap(originalBitmap.getWidth(), originalBitmap.getHeight(), Bitmap.Config.ARGB_8888);
-//        }
+        mMosaicBitmap = Bitmap.createBitmap(originalBitmap.getWidth(), originalBitmap.getHeight(), Bitmap.Config.ARGB_8888);
 
         if (mDrawCanvas == null) {
             mDrawCanvas = new Canvas(mDrawBitmap);
@@ -140,6 +138,9 @@ public class CanvasView extends SurfaceView implements Callback {
     private void onTouchMove(float x, float y) {
 
         if(mosaicFlag == true) {
+            
+            if((int)x < 0 || (int)x >= originalBitmap.getWidth() || (int)y < 0 || (int)y >= originalBitmap.getHeight()) return;
+            if(Color.alpha(originalBitmap.getPixel((int)x, (int)y)) == 0) return;
 
             int radius = 20;
             int border = 20;
@@ -152,6 +153,7 @@ public class CanvasView extends SurfaceView implements Callback {
                     count[i][j] = 0;
                 }
             }
+
             for (int i = 0; i < radius * 2 + 2; i++) {
                 for (int j = 0; j < radius * 2 + 2; j++) {
                     int nx = (int) (x + j - radius);
@@ -160,7 +162,9 @@ public class CanvasView extends SurfaceView implements Callback {
                         continue;
 
                     int pixel = originalBitmap.getPixel(nx, ny);
+                    if(Color.alpha(pixel) == 0) continue;
 
+                    // 二次元いもす法
                     int up = Math.max(i - border, 0);
                     int down = Math.min(i + border + 1, radius * 2 + 1);
                     int left = Math.max(j - border, 0);
