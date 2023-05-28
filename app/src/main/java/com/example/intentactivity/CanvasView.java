@@ -138,7 +138,7 @@ public class CanvasView extends SurfaceView implements Callback {
     private void onTouchMove(float x, float y) {
 
         if(mosaicFlag == true) {
-            
+
             if((int)x < 0 || (int)x >= originalBitmap.getWidth() || (int)y < 0 || (int)y >= originalBitmap.getHeight()) return;
             if(Color.alpha(originalBitmap.getPixel((int)x, (int)y)) == 0) return;
 

@@ -6,29 +6,79 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Hello World!"
-        app:layout_constraintBottom_toBottomOf="parent"
+    <ImageView
+        android:id="@+id/myImageTitleIsh"
+        android:layout_width="165dp"
+        android:layout_height="228dp"
+        android:layout_marginTop="120dp"
+        android:src="@drawable/title_ish"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_chainStyle="packed" />
 
     <Button
         android:id="@+id/button_picture"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Orientation"
-        tools:layout_editor_absoluteX="49dp"
-        tools:layout_editor_absoluteY="225dp" />
+        android:text="Start"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.498"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/myImageEraser"
+        app:layout_constraintVertical_bias="0.776" />
 
-    <Button
-        android:id="@+id/button_location"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Location"
-        tools:layout_editor_absoluteX="245dp"
-        tools:layout_editor_absoluteY="225dp" />
+    <ImageView
+        android:id="@+id/myImageTitleEraser"
+        android:layout_width="216dp"
+        android:layout_height="244dp"
+        android:src="@drawable/title_eraser"
+        app:layout_constraintBottom_toTopOf="@+id/myImageTitleMagic"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.497"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.0"
+        app:layout_constraintVertical_chainStyle="packed" />
+
+
+
+    <ImageView
+        android:id="@+id/myImageTitleMagic"
+        android:layout_width="216dp"
+        android:layout_height="244dp"
+        android:layout_marginTop="56dp"
+        android:src="@drawable/title_magic"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.497"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_chainStyle="packed" />
+
+    <ImageView
+        android:id="@+id/myImageMagic"
+        android:layout_width="216dp"
+        android:layout_height="244dp"
+        android:layout_marginTop="328dp"
+        android:src="@drawable/magic"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.497"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_chainStyle="packed" />
+
+    <ImageView
+        android:id="@+id/myImageEraser"
+        android:layout_width="57dp"
+        android:layout_height="112dp"
+        android:layout_marginTop="312dp"
+        android:src="@drawable/eraser"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.435"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_chainStyle="packed" />
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

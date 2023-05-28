@@ -14,16 +14,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        Button orientationActivitySwitchButton = (Button) findViewById(R.id.button_picture);
-        orientationActivitySwitchButton.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View arg0) {
-                Intent intent = new Intent(getApplicationContext(), Picture.class);
-                startActivity(intent);
-            }
-        });
-        Button locationActivitySwitchButton = (Button) findViewById(R.id.button_location);
-        locationActivitySwitchButton.setOnClickListener(new View.OnClickListener() {
+        findViewById(R.id.button_picture).setOnClickListener(new View.OnClickListener() {
             public void onClick(View arg0) {
                 Intent intent = new Intent(getApplicationContext(), Picture.class);
                 startActivity(intent);
