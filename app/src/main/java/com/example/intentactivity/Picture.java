@@ -39,6 +39,9 @@ public class Picture extends FragmentActivity implements OnClickListener {
     private Button mDrawBtn;
     private File photoFile;
 
+    private int width = 1000;
+    private int height = 1500;
+
 
 
     @Override
@@ -139,14 +142,30 @@ public class Picture extends FragmentActivity implements OnClickListener {
                 uri = resultData.getData();
                 try {
                     Bitmap mBitmap = getBitmapFromUri(uri);
+                    if(mBitmap.getWidth() > width) {
+                        mBitmap = Bitmap.createScaledBitmap(mBitmap, width, (int)mBitmap.getHeight()*width/mBitmap.getWidth(), false);
+                    }
+                    if(mBitmap.getHeight() > height) {
+                        mBitmap = Bitmap.createScaledBitmap(mBitmap, (int)mBitmap.getWidth()*height/mBitmap.getHeight(), height, false);
+                    }
+                    System.out.println("mBitmap");
+                    System.out.println(mBitmap.getWidth());
+                    System.out.println(mBitmap.getHeight());
+
                     mCanvasView.setCanvas(mBitmap);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
             }
         } else if(requestCode == REQUEST_CAPTURE_IMAGEFILE && resultCode == Activity.RESULT_OK ){
-            Bitmap capturedImage = BitmapFactory.decodeFile(photoFile.getAbsolutePath());
-            mCanvasView.setCanvas(capturedImage);
+            Bitmap mBitmap = BitmapFactory.decodeFile(photoFile.getAbsolutePath());
+            if(mBitmap.getWidth() > width) {
+                mBitmap = Bitmap.createScaledBitmap(mBitmap, width, (int)mBitmap.getHeight()*width/mBitmap.getWidth(), false);
+            }
+            if(mBitmap.getHeight() > height) {
+                mBitmap = Bitmap.createScaledBitmap(mBitmap, (int)mBitmap.getWidth()*height/mBitmap.getHeight(), height, false);
+            }
+            mCanvasView.setCanvas(mBitmap);
         }
     }
 

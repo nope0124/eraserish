@@ -48,7 +48,7 @@ public class CanvasView extends SurfaceView implements Callback {
 
     private void clearDrawBitmap() {
         if (mDrawBitmap == null) {
-            mDrawBitmap = Bitmap.createBitmap(getWidth(), getHeight(), Bitmap.Config.ARGB_8888);
+            mDrawBitmap = Bitmap.createBitmap(originalBitmap.getWidth(), originalBitmap.getHeight(), Bitmap.Config.ARGB_8888);
         }
 
 //        if (mMosaicBitmap == null) {
@@ -327,13 +327,15 @@ public class CanvasView extends SurfaceView implements Callback {
             mDrawBitmap.recycle();
         }
 
-        mDrawBitmap = Bitmap.createBitmap(getWidth(), getHeight(), Bitmap.Config.ARGB_8888);
-
-        mDrawCanvas = new Canvas(mDrawBitmap);
-
         originalBitmap = mBitmap.copy(Bitmap.Config.ARGB_8888, true);
 
         mMosaicBitmap = Bitmap.createBitmap(originalBitmap.getWidth(), originalBitmap.getHeight(), Bitmap.Config.ARGB_8888);
+
+        mDrawBitmap = Bitmap.createBitmap(originalBitmap.getWidth(), originalBitmap.getHeight(), Bitmap.Config.ARGB_8888);
+
+        mDrawCanvas = new Canvas(mDrawBitmap);
+
+
         reset();
     }
 
@@ -342,7 +344,13 @@ public class CanvasView extends SurfaceView implements Callback {
     }
 
     public Bitmap getBitmap() {
-        return originalBitmap;
+        Bitmap finalBitmap = Bitmap.createBitmap(originalBitmap.getWidth(), originalBitmap.getHeight(), originalBitmap.getConfig());
+        Canvas canvas = new Canvas(finalBitmap);
+        canvas.drawBitmap(originalBitmap, 0, 0, null);
+        canvas.drawBitmap(mMosaicBitmap, 0, 0, null);
+        canvas.drawBitmap(mDrawBitmap, 0, 0, null);
+
+        return finalBitmap;
     }
 
 }
